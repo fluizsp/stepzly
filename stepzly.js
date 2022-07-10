@@ -31,7 +31,8 @@ class Steps {
         }
         return returnValue
     };
-    performSet(set, resolve) {
+    performSet(step, resolve) {
+        let set = step.set
         if (!Array.isArray(set.to))
             set.to = [set.to]
         if (!Array.isArray(set.from))
@@ -45,7 +46,8 @@ class Steps {
         }
         resolve(true)
     }
-    performUnset(unset, resolve) {
+    performUnset(step, resolve) {
+        let unset = step.unset
         if (!Array.isArray(unset.from))
             unset.from = [unset.from]
         const target = unset.response ? this.response : this.state
@@ -62,7 +64,8 @@ class Steps {
                 this.resolveObject(object[attr])
         }
     }
-    performFetch(fetch, resolve) {
+    performFetch(step, resolve) {
+        let fetch = step.fetch
         let headers = {}
         let bodyData = {}
         fetch.url = this.resolveValue(fetch.url)
