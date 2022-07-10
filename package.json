@@ -8,7 +8,7 @@
   },
   "name": "stepzly",
   "version": "0.1.0",
-  "main": "app.js",
+  "main": "stepzly.js",
   "directories": {
     "lib": "lib"
   },
