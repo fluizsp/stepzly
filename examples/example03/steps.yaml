@@ -1,0 +1,17 @@
+steps:
+  - set:
+      name: "names"
+      to: ["firstName","lastName"]
+      from: ["John","Doe"]
+  - fetch:
+      name: "POST test 1"
+      url: "http://127.0.0.1"
+      verb: "POST"
+      body:
+        xml:
+          category: 
+            _version: "a"
+            text: "movies"
+          start: 0
+          limit: 100
+          name: "{{firstName}}"

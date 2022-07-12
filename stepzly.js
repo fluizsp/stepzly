@@ -4,7 +4,7 @@ const v = require('./lib/values')
 const d = require('./lib/data')
 const Promise = require('bluebird')
 const { resolve } = require('path')
-class Steps {
+class Stepzly {
     constructor(steps, initialState, logExtension) {
         this._steps = steps
         this.logOutput = ""
@@ -42,7 +42,7 @@ class Steps {
                 this.placeholderRegex.lastIndex = 0;
                 let newValue = p.retrieve(this.state, placeholderCheck[1])
                 returnValue = returnValue == placeholderCheck[0] || typeof newValue == 'object' ? newValue :
-                     returnValue.replace(placeholderCheck[0], newValue)
+                    returnValue.replace(placeholderCheck[0], newValue)
             }
         }
         return returnValue
@@ -85,7 +85,7 @@ class Steps {
         let fetch = step.fetch
         let headers = {}
         let bodyData = {}
-        fetch.url = this.resolveValue(fetch.url, step.loopIndex)
+        let url = this.resolveValue(fetch.url, step.loopIndex)
         if (fetch.headers !== undefined)
             fetch.headers.map((header, index) => {
                 let headerKey = Object.keys(header)[0]
@@ -97,14 +97,14 @@ class Steps {
             bodyData = fetch.body
         }
         let req = {
-            url: fetch.url,
+            url: url,
             headers: headers,
             contentType: fetch.contentType,
             verb: fetch.verb,
             body: bodyData
         }
         let res = d.fetch(req, res => {
-            p.assign(this.state, fetch.to, res)
+            p.assign(this.state, this.resolveParam(fetch.to, step.loopIndex), res)
             resolve(true)
         }, (err) => {
             this.errors.push(`Error in performFetch: ${err}`)
@@ -117,17 +117,18 @@ class Steps {
         step.loopIndex = 0
         step.loopCount = 1
         if (step.loopOver) {
-            step.loopOver = this.resolveValue(step.loopOver)
+            step.loopOver = p.retrieve(this.state, step.loopOver)
             step.loopCount = step.loopOver.length
         }
         for (step.loopIndex; step.loopIndex < step.loopCount; step.loopIndex++)
             loopPromises.push(new Promise(resolve => {
-                if (step.set)
-                    this.performSet(step, resolve)
-                if (step.unset)
-                    this.performUnset(step, resolve)
-                if (step.fetch)
-                    this.performFetch(step, resolve)
+                let indexedStep = Object.assign({}, step)
+                if (indexedStep.set)
+                    this.performSet(indexedStep, resolve)
+                if (indexedStep.unset)
+                    this.performUnset(indexedStep, resolve)
+                if (indexedStep.fetch)
+                    this.performFetch(indexedStep, resolve)
             }))
         return Promise.all(loopPromises).then(new Promise((resolve) => {
             resolve(true);
@@ -153,4 +154,4 @@ class Steps {
         })
     }
 }
-module.exports = Steps
+module.exports = Stepzly

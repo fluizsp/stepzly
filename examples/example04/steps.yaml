@@ -1,0 +1,20 @@
+steps:
+  - set:
+      to:
+        - myArray
+        - myNames
+      from:
+        - [52, 53, 54, 55]
+        - [John, Andrew, Phillip, Finn]
+    name: Set Array
+  - set:
+      to: 
+        - myResult.{{index}}.number
+        - myResult.{{index}}.name
+      from: 
+        - '{{myArray.{{index}}}}'
+        - '{{myNames.{{index}}}}'
+      append: true
+      response: true
+    name: Set from Loop
+    loopOver: "myArray"

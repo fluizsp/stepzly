@@ -1,0 +1,21 @@
+steps:
+  - set:
+      name: "Set Request Vars"
+      to: ["user","seed"]
+      from: ["brianchandotcom", 0]
+  - fetch:
+      name: "Get Github User"
+      url: "https://api.github.com/users/{{user}}?seed={{seed}}"
+      to: "githubUser"
+  - fetch:
+      name: "Get Github Followers"
+      url: "https://api.github.com/users/{{user}}/followers"
+      to: "githubUser.followers"
+  - unset:
+      name: "Remove github vars"
+      from: ["githubUser.location","githubUser.email","githubUser.hireable","githubUser.blog","githubUser.bio","githubUser.company"]
+  - set:
+      name: "Response"
+      to: response.githubUser
+      from: "{{githubUser}}"
+      response: true

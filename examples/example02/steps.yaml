@@ -1,0 +1,14 @@
+steps:
+  - fetch:
+      name: "Get Random Entries"
+      url: "https://api.publicapis.org/random"
+      to: "entries"
+  - set:
+      name: "names"
+      to: ["firstName","lastName"]
+      from: ["John","Doe"]
+  - set:
+      name: "Response"
+      to: response.entries
+      from: "Welcome {{lastName}}, {{firstName}}, the API Randomly picked was: {{entries.entries.0.API}}, link is {{entries.entries.0.Link}}"
+      response: true

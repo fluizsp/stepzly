@@ -1,0 +1,16 @@
+steps:
+  - set:
+      to: topGitHubUsers
+      from:
+        - [visionmedia, c9s, fabbot]
+    name: Array with top GH users
+  - fetch:
+      url: https://api.github.com/users/{{topGitHubUsers.{{index}}}}
+      to: githubUsersInfo.{{index}}
+    loopOver: topGitHubUsers
+    name: Retrieve each GH info
+  - set:
+      to: users
+      from: '{{githubUsersInfo}}'
+      response: true
+    name: Info to Response
