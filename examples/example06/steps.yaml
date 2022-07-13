@@ -1,0 +1,44 @@
+steps:
+  - set:
+      to: githubOrg
+      from: microsoft
+    name: Define GH org
+  - fetch:
+      url: https://api.github.com/orgs/{{githubOrg}}
+      to: ghOrgInfo
+    name: Retrieve GH Org info
+  - convert:
+      from:
+        - "{{ghOrgInfo.created_at}}"
+        - "{{ghOrgInfo.updated_at}}"
+      to:
+        - ghOrgInfo.created_date
+        - ghOrgInfo.updated_date
+      conversion: toDate
+    name: Convert Dates
+  - calculate:
+      from:
+        - "{{ghOrgInfo.followers}}"
+        - "{{ghOrgInfo.following}}"
+      to: ghOrgInfo.follower_and_following
+      operator: +
+    name: Calculate Followers + Following
+  - split:
+      from: "{{ghOrgInfo.avatar_url}}"
+      to: ghOrgInfo.avatarUrlFragments
+      separator: /
+    name: Separate Avatar Url Fragments
+  - join:
+      from: "{{ghOrgInfo.avatarUrlFragments}}"
+      to: ghOrgInfo.avatarUnderlineUrl
+      separator: _
+    name: Join Avatar Url Fragments with underline
+  - extract:
+      from: "{{ghOrgInfo.avatar_url}}"
+      to: ghOrgInfo.avatar_id
+      expression: 'u\/(.*)\?'
+    name: Extract Avatar ID
+  - set:
+      to: ghOrgInfo.avatar_id
+      from: '{{ghOrgInfo.avatar_id.1}}'
+    name: CleanUp Regex

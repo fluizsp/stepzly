@@ -3,7 +3,6 @@ const p = require('./lib/properties')
 const v = require('./lib/values')
 const d = require('./lib/data')
 const Promise = require('bluebird')
-const { resolve } = require('path')
 class Stepzly {
     constructor(steps, initialState, logExtension) {
         this._steps = steps
@@ -39,7 +38,7 @@ class Stepzly {
             }
             let placeholderCheck = null;
             while (placeholderCheck = this.placeholderRegex.exec(returnValue)) {
-                this.placeholderRegex.lastIndex = 0;
+                this.placeholderRegex.lastIndex = 0
                 let newValue = p.retrieve(this.state, placeholderCheck[1])
                 returnValue = returnValue == placeholderCheck[0] || typeof newValue == 'object' ? newValue :
                     returnValue.replace(placeholderCheck[0], newValue)
@@ -70,6 +69,80 @@ class Stepzly {
         for (let i = 0; i < unset.from.length; i++) {
             unset.from[i] = this.resolveParam(unset.from[i], step.loopIndex)
             p.remove(target, unset.from[i])
+        }
+        resolve(true)
+    }
+    performConvert(step, resolve) {
+        let convert = step.convert
+        if (!Array.isArray(convert.to))
+            convert.to = [convert.to]
+        if (!Array.isArray(convert.from))
+            convert.from = [convert.from]
+        let value = null;
+        for (let i = 0; i < convert.to.length; i++) {
+            if (convert.from[i] !== undefined) {
+                value = this.resolveValue(convert.from[i], step.loopIndex)
+                value = v.convert(value, convert.conversion)
+            }
+            p.assign(this.state, this.resolveParam(convert.to[i], step.loopIndex), value)
+        }
+        resolve(true)
+    }
+    performCalculate(step, resolve) {
+        let calculate = step.calculate
+        if (!Array.isArray(calculate.from))
+            calculate.from = [calculate.from]
+        let value = this.resolveValue(calculate.from[0], step.loopIndex);
+        for (let i = 1; i < calculate.from.length; i++) {
+            if (calculate.from[i] !== undefined) {
+                value = v.calculate(value, this.resolveValue(calculate.from[i], step.loopIndex), calculate.operator)
+            }
+            p.assign(this.state, this.resolveParam(calculate.to, step.loopIndex), value)
+        }
+        resolve(true)
+    }
+    performSplit(step, resolve) {
+        let split = step.split
+        if (!Array.isArray(split.to))
+            split.to = [split.to]
+        if (!Array.isArray(split.from))
+            split.from = [split.from]
+        let value = null;
+        for (let i = 0; i < split.from.length; i++) {
+            if (split.from[i] !== undefined) {
+                value = v.split(this.resolveValue(split.from[i], step.loopIndex), split.separator)
+                p.assign(this.state, this.resolveParam(split.to[i], step.loopIndex), value)
+            }
+        }
+        resolve(true)
+    }
+    performJoin(step, resolve) {
+        let join = step.join
+        if (!Array.isArray(join.to))
+            join.to = [join.to]
+        if (!Array.isArray(join.from))
+            join.from = [join.from]
+        let value = null;
+        for (let i = 0; i < join.to.length; i++) {
+            if (join.from[i] !== undefined) {
+                value = v.join(this.resolveValue(join.from[i], step.loopIndex), join.separator)
+                p.assign(this.state, this.resolveParam(join.to[i], step.loopIndex), value)
+            }
+        }
+        resolve(true)
+    }
+    performExtract(step, resolve) {
+        let extract = step.extract
+        if (!Array.isArray(extract.to))
+            extract.to = [extract.to]
+        if (!Array.isArray(extract.from))
+            extract.from = [extract.from]
+        let value = null;
+        for (let i = 0; i < extract.to.length; i++) {
+            if (extract.from[i] !== undefined) {
+                value = v.extract(this.resolveValue(extract.from[i], step.loopIndex), extract.expression, extract.expressionOptions)
+                p.assign(this.state, this.resolveParam(extract.to[i], step.loopIndex), value)
+            }
         }
         resolve(true)
     }
@@ -129,6 +202,16 @@ class Stepzly {
                     this.performUnset(indexedStep, resolve)
                 if (indexedStep.fetch)
                     this.performFetch(indexedStep, resolve)
+                if (indexedStep.convert)
+                    this.performConvert(indexedStep, resolve)
+                if (indexedStep.calculate)
+                    this.performCalculate(indexedStep, resolve)
+                if (indexedStep.split)
+                    this.performSplit(indexedStep, resolve)
+                if (indexedStep.join)
+                    this.performJoin(indexedStep, resolve)
+                if (indexedStep.extract)
+                    this.performExtract(indexedStep, resolve)
             }))
         return Promise.all(loopPromises).then(new Promise((resolve) => {
             resolve(true);
