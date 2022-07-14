@@ -10,7 +10,7 @@ class Stepzly {
         this.logExtension = logExtension
         this.state = initialState === undefined || initialState === null ? {} : initialState
         this.state.start = new Date();
-        this.response = {}
+        this.result = {}
         this.errors = []
         this.placeholderRegex = new RegExp('{{([a-z0-9\.\_]+)}}', 'gi');
     }
@@ -268,16 +268,15 @@ class Stepzly {
             Promise.each(this._steps, (step, index, length) => {
                 return this.runStep(step)
             }).then(() => {
-                let responseResult = null;
-                this.log('Response length: ' + JSON.stringify(responseResult).length)
+                let runResult = null;
                 this.log('End: ' + new Date().toISOString())
-                responseResult = debug ? {
-                    response: this.response,
+                runResult = debug ? {
+                    result: this.result,
                     state: this.state,
                     errors: this.errors,
                     log: this.logOutput
-                } : this.response ?? {}
-                resolve(responseResult)
+                } : this.result ?? {}
+                resolve(runResult)
             })
         })
     }

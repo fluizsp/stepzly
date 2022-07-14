@@ -1,8 +1,8 @@
 steps:
   - set:
-      name: "Set Request Vars"
       to: ["user","seed"]
       from: ["brianchandotcom", 0]
+    name: "Set Request Vars"
   - fetch:
       name: "Get Github User"
       url: "https://api.github.com/users/{{user}}?seed={{seed}}"
