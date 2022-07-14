@@ -22,6 +22,6 @@ steps:
     name: Get DD
   - set:
       name: "Response"
-      to: response.githubUser
+      to: githubUser
       from: "{{githubUser}}"
-      response: true
+      result: true

@@ -15,6 +15,6 @@ steps:
         - '{{myArray.{{index}}}}'
         - '{{myNames.{{index}}}}'
       append: true
-      response: true
+      result: true
     name: Set from Loop
     loopOver: "myArray"

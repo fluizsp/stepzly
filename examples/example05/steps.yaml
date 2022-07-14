@@ -12,5 +12,5 @@ steps:
   - set:
       to: users
       from: '{{githubUsersInfo}}'
-      response: true
+      result: true
     name: Info to Response

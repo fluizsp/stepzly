@@ -9,6 +9,6 @@ steps:
       from: ["John","Doe"]
   - set:
       name: "Response"
-      to: response.entries
+      to: entries
       from: "Welcome {{lastName}}, {{firstName}}, the API Randomly picked was: {{entries.entries.0.API}}, link is {{entries.entries.0.Link}}"
-      response: true
+      result: true
