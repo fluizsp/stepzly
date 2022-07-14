@@ -14,6 +14,12 @@ steps:
   - unset:
       name: "Remove github vars"
       from: ["githubUser.location","githubUser.email","githubUser.hireable","githubUser.blog","githubUser.bio","githubUser.company"]
+  - convert:
+      from: '{{start}}'
+      to: startDayOfWeek
+      conversion: toString
+      format: E
+    name: Get DD
   - set:
       name: "Response"
       to: response.githubUser

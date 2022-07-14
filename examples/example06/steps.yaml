@@ -23,6 +23,12 @@ steps:
       to: ghOrgInfo.follower_and_following
       operator: +
     name: Calculate Followers + Following
+    conditions:
+      - Has Followers:
+          compare: "{{ghOrgInfo.followers}}"
+          with: 0
+          operator: greater
+          logical: or
   - split:
       from: "{{ghOrgInfo.avatar_url}}"
       to: ghOrgInfo.avatarUrlFragments
@@ -40,5 +46,11 @@ steps:
     name: Extract Avatar ID
   - set:
       to: ghOrgInfo.avatar_id
-      from: '{{ghOrgInfo.avatar_id.1}}'
+      from: "{{ghOrgInfo.avatar_id.1}}"
     name: CleanUp Regex
+  - validate:
+      compare: "{{ghOrgInfo.followers}}"
+      with: 0
+      operator: greater
+      to: ghOrgInfo.has_followers
+    name: Validate Org followers

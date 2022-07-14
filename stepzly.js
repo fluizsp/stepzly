@@ -9,6 +9,7 @@ class Stepzly {
         this.logOutput = ""
         this.logExtension = logExtension
         this.state = initialState === undefined || initialState === null ? {} : initialState
+        this.state.start = new Date();
         this.response = {}
         this.errors = []
         this.placeholderRegex = new RegExp('{{([a-z0-9\.\_]+)}}', 'gi');
@@ -53,7 +54,7 @@ class Stepzly {
         if (!Array.isArray(set.from))
             set.from = [set.from]
         let value = null;
-        const target = set.response ? this.response : this.state
+        const target = set.result ? this.result : this.state
         for (let i = 0; i < set.to.length; i++) {
             if (set.from[i] !== undefined)
                 value = this.resolveValue(set.from[i], step.loopIndex)
@@ -65,7 +66,7 @@ class Stepzly {
         let unset = step.unset
         if (!Array.isArray(unset.from))
             unset.from = [unset.from]
-        const target = unset.response ? this.response : this.state
+        const target = unset.result ? this.result : this.state
         for (let i = 0; i < unset.from.length; i++) {
             unset.from[i] = this.resolveParam(unset.from[i], step.loopIndex)
             p.remove(target, unset.from[i])
@@ -82,7 +83,7 @@ class Stepzly {
         for (let i = 0; i < convert.to.length; i++) {
             if (convert.from[i] !== undefined) {
                 value = this.resolveValue(convert.from[i], step.loopIndex)
-                value = v.convert(value, convert.conversion)
+                value = v.convert(value, convert.conversion, convert.format)
             }
             p.assign(this.state, this.resolveParam(convert.to[i], step.loopIndex), value)
         }
@@ -146,6 +147,25 @@ class Stepzly {
         }
         resolve(true)
     }
+    performValidate(step, resolve) {
+        let validate = step.validate
+        if (!Array.isArray(validate.with))
+            validate.with = [validate.with]
+        if (!Array.isArray(validate.compare))
+            validate.compare = [validate.compare]
+        if (!Array.isArray(validate.operator))
+            validate.operator = [validate.operator]
+        let value = null;
+        let logicalOperator = validate.logical ?? 'and'
+        for (let i = 0; i < validate.with.length; i++) {
+            if (validate.compare[i] !== undefined) {
+                let validated = v.compare(this.resolveValue(validate.compare[i], step.loopIndex), this.resolveValue(validate.with[i], step.loopIndex), validate.operator[i])
+                value = value == null ? validated : logicalOperator == 'and' ? value && validated : value || validated
+            }
+        }
+        p.assign(this.state, this.resolveParam(validate.to, step.loopIndex), value)
+        resolve(true)
+    }
     resolveObject(object) {
         for (let attr in object) {
             if (typeof object[attr] !== 'object')
@@ -193,26 +213,51 @@ class Stepzly {
             step.loopOver = p.retrieve(this.state, step.loopOver)
             step.loopCount = step.loopOver.length
         }
-        for (step.loopIndex; step.loopIndex < step.loopCount; step.loopIndex++)
-            loopPromises.push(new Promise(resolve => {
-                let indexedStep = Object.assign({}, step)
-                if (indexedStep.set)
-                    this.performSet(indexedStep, resolve)
-                if (indexedStep.unset)
-                    this.performUnset(indexedStep, resolve)
-                if (indexedStep.fetch)
-                    this.performFetch(indexedStep, resolve)
-                if (indexedStep.convert)
-                    this.performConvert(indexedStep, resolve)
-                if (indexedStep.calculate)
-                    this.performCalculate(indexedStep, resolve)
-                if (indexedStep.split)
-                    this.performSplit(indexedStep, resolve)
-                if (indexedStep.join)
-                    this.performJoin(indexedStep, resolve)
-                if (indexedStep.extract)
-                    this.performExtract(indexedStep, resolve)
-            }))
+        for (step.loopIndex; step.loopIndex < step.loopCount; step.loopIndex++) {
+            let indexedStep = Object.assign({}, step)
+            indexedStep.conditionsSatisfied = true      
+            if (indexedStep.conditions) {
+                indexedStep.conditionsSatisfied = null
+                for (let iCondition = 0; iCondition < indexedStep.conditions.length; iCondition++) {
+                    let condition = indexedStep.conditions[iCondition]
+                    condition = condition[Object.keys(condition)[0]]
+                    let conditionsSatisfied = null
+                    let logicalOperator = condition.logical ?? 'and'
+                    if (!Array.isArray(condition.with))
+                        condition.with = [condition.with]
+                    if (!Array.isArray(condition.operator))
+                        condition.operator = [condition.operator]
+                    if (!Array.isArray(condition.compare))
+                        condition.compare = [condition.compare]
+                    for (let i = 0; i < condition.compare.length; i++) {
+                        let satisfied = v.compare(this.resolveValue(condition.compare[i], indexedStep.loopIndex), this.resolveValue(condition.with[i], indexedStep.loopIndex), condition.operator[i])
+                        indexedStep.conditionsSatisfied = indexedStep.conditionsSatisfied == null ? satisfied : logicalOperator == 'and' ? indexedStep.conditionsSatisfied && satisfied : indexedStep.conditionsSatisfied || satisfied
+                    }
+                    this.log(`Condition ${Object.keys(indexedStep.conditions[0])} satisfied? ${indexedStep.conditionsSatisfied}`)
+                }
+            }
+            if (indexedStep.conditionsSatisfied)
+                loopPromises.push(new Promise(resolve => {
+                    if (indexedStep.set)
+                        this.performSet(indexedStep, resolve)
+                    if (indexedStep.unset)
+                        this.performUnset(indexedStep, resolve)
+                    if (indexedStep.fetch)
+                        this.performFetch(indexedStep, resolve)
+                    if (indexedStep.convert)
+                        this.performConvert(indexedStep, resolve)
+                    if (indexedStep.calculate)
+                        this.performCalculate(indexedStep, resolve)
+                    if (indexedStep.split)
+                        this.performSplit(indexedStep, resolve)
+                    if (indexedStep.join)
+                        this.performJoin(indexedStep, resolve)
+                    if (indexedStep.extract)
+                        this.performExtract(indexedStep, resolve)
+                    if (indexedStep.validate)
+                        this.performValidate(indexedStep, resolve)
+                }))
+        }
         return Promise.all(loopPromises).then(new Promise((resolve) => {
             resolve(true);
         }));
