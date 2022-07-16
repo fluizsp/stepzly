@@ -7,9 +7,13 @@
     "qs": "^6.11.0",
     "x2js": "^3.4.3"
   },
+  "contributors":[
+    "Fabio Luiz de Souza Pereira (fabio_lsp@msn.com)"
+  ],
   "name": "stepzly",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "main": "stepzly.js",
+  "repository": "fabio-luiz-pereira/stepzly",
   "directories": {
     "lib": "lib",
     "examples": "examples"
