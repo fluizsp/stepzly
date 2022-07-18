@@ -7,7 +7,7 @@
     "qs": "^6.11.0",
     "x2js": "^3.4.3"
   },
-  "contributors":[
+  "contributors": [
     "Fabio Luiz de Souza Pereira (fabio_lsp@msn.com)"
   ],
   "name": "stepzly",
@@ -19,9 +19,12 @@
     "examples": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "Fabio Luiz Pereira",
   "license": "MIT",
-  "description": "Stepzly is a lib to perform stepped, predefined actions suitable to data transformation, aggregation, calculation and validation. It's part of a Low-Code BFF (Back for Front) solution, but can be used separately. It is designed to run on the server-side."
+  "description": "Stepzly is a lib to perform stepped, predefined actions suitable to data transformation, aggregation, calculation and validation. It's part of a Low-Code BFF (Back for Front) solution, but can be used separately. It is designed to run on the server-side.",
+  "devDependencies": {
+    "mocha": "^10.0.0"
+  }
 }
