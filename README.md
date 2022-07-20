@@ -71,10 +71,11 @@ $ npm install stepzly
   * Run loops based on lists with context
   * Define conditions for each step execution
   
-## Desired Features to next versions
+## Desired Features for next versions
 
   * Implement common Authentication methods for Fetch (Basic, API key, Bearer, Basic auth, Digest, OAuth 1.0, OAuth 2.0)
   * Implement routines, wich is basically groups of steps that runs on the same context (e.g. a loop) and have similar conditions
+  * Support more robust logging and instrumentation/telemetry
   
 ## Documentation and Wiki
 
