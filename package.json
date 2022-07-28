@@ -25,6 +25,11 @@
   "license": "MIT",
   "description": "Stepzly is a lib to perform stepped, predefined actions suitable to data transformation, aggregation, calculation and validation. It's part of a Low-Code BFF (Back for Front) solution, but can be used separately. It is designed to run on the server-side.",
   "devDependencies": {
+    "eslint": "^8.20.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.4",
+    "eslint-plugin-promise": "^6.0.0",
     "mocha": "^10.0.0"
   }
 }

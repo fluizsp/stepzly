@@ -15,7 +15,6 @@ describe('Properties -> Assign', function () {
     p.assign(testObject, 'originalObj.var04', testObject.startDate)
     p.assign(testObject, 'newArray.0', 'first')
     p.assign(testObject, 'originalArray', 'fourth', true)
-    console.log(testObject)
     it('var01 attribute of originalObj of testObject should be "One-01"', function () {
         assert.equal(testObject.originalObj.var01, 'One-01')
     })
