@@ -71,14 +71,89 @@ describe('Values -> Calulate', function () {
     })
     it('result02 should be equals to 50', function () {
         assert.equal(result02, 50)
-    })    
+    })
     it('result03 should be equals to 700', function () {
         assert.equal(result03, 700)
-    })   
+    })
     it('result04 should be equals to 8', function () {
         assert.equal(result04, 8)
-    })   
+    })
     it('result05 should be equals to 3', function () {
         assert.equal(result05, 3)
-    })        
+    })
+})
+describe('Values -> Split & Join', function () {
+    const testObject = {
+        var01: 'John|Paul|Smith|Thomas',
+        var02: [50, 60, 70, 80]
+    }
+    const result01 = v.split(testObject.var01, '|');
+    const result02 = v.join(testObject.var02, ',');
+    it('result01 should be equals to an Array of names', function () {
+        assert.equal(result01[0], 'John')
+        assert.equal(result01[1], 'Paul')
+        assert.equal(result01[2], 'Smith')
+        assert.equal(result01[3], 'Thomas')
+    })
+    it('result02 should be equals to "50,60,70,80"', function () {
+        assert.equal(result02, '50,60,70,80')
+    })
+})
+describe('Values -> Extract', function () {
+    const testObject = {
+        var01: '<div class="container"><div class="inline-text">One long string</div><div class="inline-red-icon"></div></div>',
+        var02: 'Copy, Neo is the name of the suspect.'
+    }
+    const result01 = v.extract(testObject.var01, '(?:text\"\>)([a-z0-9 ]+)', 'gi')[1];
+    const result02 = v.extract(testObject.var02, '(?:, )([a-z0-9 ]+)(?: is)', 'gi')[1];
+    it('result01 should be equals to "One long string"', function () {
+        assert.equal(result01, 'One long string')
+    })
+    it('result02 should be equals to "Neo"', function () {
+        assert.equal(result02, 'Neo')
+    })
+})
+describe('Values -> Compare', function () {
+    const startDate = new Date()
+    const startDateTicks = Number(startDate) / 1000
+    const testObject = {
+        var01: 50.05,
+        var02: 60,
+        var03: "70",
+        var04: 1,
+        var05: "true",
+        var06: startDateTicks,
+        var07: startDate,
+        var08: 'Copy, Neo is the name of the suspect.'
+    }
+    it('var01 should be "equals" to 50.05', function () {
+        assert.equal(v.compare(testObject.var01, 50.05, 'equals'), true)
+    })
+    it('var01 should also be "equals" to "50.05"', function () {
+        assert.equal(v.compare(testObject.var01, '50.05', 'equals'), true)
+    })
+    it('var02 should be greater than var01', function () {
+        assert.equal(v.compare(testObject.var02, testObject.var01, 'greater'), true)
+    })
+    it('var01 should be lesser than var03', function () {
+        assert.equal(v.compare(testObject.var01, testObject.var03, 'lesser'), true)
+    })
+    it('var04 should be lesser or equals than 1', function () {
+        assert.equal(v.compare(testObject.var04, 1, 'lesserorequals'), true)
+    })
+    it('var05 should be equals to boolean true', function () {
+        assert.equal(v.compare(true, testObject.var05, 'equals'), true)
+    })
+    it('startDate should be equals to var07', function () {
+        assert.equal(v.compare(testObject.var07, startDate, 'equals'), true)
+    })
+    it('var08 should contains "Neo"', function () {
+        assert.equal(v.compare(testObject.var08, 'Neo', 'contains'), true)
+    })
+    it('var01 should be set', function () {
+        assert.equal(v.compare(testObject.var01, null, 'isset'), true)
+    })
+    it('var09 should not be set', function () {
+        assert.equal(v.compare(testObject.var09, null, 'isset'), false)
+    })    
 })
